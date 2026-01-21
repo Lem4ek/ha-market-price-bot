@@ -1,23 +1,17 @@
-ARG BUILD_FROM
+ARG BUILD_FROM=ghcr.io/home-assistant/addon-base-python:3.12
 FROM $BUILD_FROM
 
 ENV LANG=C.UTF-8
 
 WORKDIR /app
 
-# Python + pip
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    py3-setuptools
-
-# зависимости
+# Python зависимости
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir --break-system-packages -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# код
+# Код бота
 COPY bot /app/bot
 COPY run.sh /app/run.sh
 
-# ПРАВИЛЬНЫЙ CMD
+# Запуск через s6
 CMD ["/app/run.sh"]
