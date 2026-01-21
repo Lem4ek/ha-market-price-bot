@@ -10,6 +10,8 @@ def confirm_kb():
 
 def interval_kb():
     kb = InlineKeyboardMarkup(row_width=2)
-    for h in [3, 6, 9, 12]:
-        kb.insert(InlineKeyboardButton(f"{h} ч", callback_data=f"interval_{h}"))
+    for h in (3, 6, 9, 12):
+        kb.insert(
+            InlineKeyboardButton(f"{h} часов", callback_data=f"interval_{h}")
+        )
     return kb
