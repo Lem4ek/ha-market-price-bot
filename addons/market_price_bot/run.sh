@@ -1,2 +1,2 @@
 #!/usr/bin/with-contenv sh
-python3 bot/main.py
+python3 /app/bot/main.py
