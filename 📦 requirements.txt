@@ -1,0 +1,4 @@
+aiogram
+requests
+matplotlib
+apscheduler
