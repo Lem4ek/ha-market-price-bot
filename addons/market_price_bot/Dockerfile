@@ -14,8 +14,8 @@ RUN apk add --no-cache \
 # 2️⃣ Копируем зависимости
 COPY requirements.txt /app/requirements.txt
 
-# 3️⃣ Ставим Python-библиотеки
-RUN pip3 install --no-cache-dir -r /app/requirements.txt
+# 3️⃣ СТАВИМ pip-ПАКЕТЫ (ВАЖНО!)
+RUN pip3 install --no-cache-dir --break-system-packages -r /app/requirements.txt
 
 # 4️⃣ Копируем код
 COPY bot /app/bot
