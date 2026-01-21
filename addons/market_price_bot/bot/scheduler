@@ -1,0 +1,51 @@
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from parsers.ozon import parse_ozon
+from parsers.wb import parse_wb
+from storage import get_items, update_price
+
+class PriceScheduler:
+    def __init__(self, bot, chat_id):
+        self.bot = bot
+        self.chat_id = chat_id
+        self.scheduler = AsyncIOScheduler()
+
+    def start(self):
+        for item in get_items():
+            self.add_item_job(item)
+        self.scheduler.start()
+
+    def add_item_job(self, item):
+        self.scheduler.add_job(
+            self.check_item,
+            trigger="interval",
+            hours=item["interval"],
+            args=[dict(item)],
+            id=f"item_{item['id']}",
+            replace_existing=True
+        )
+
+    async def check_item(self, item):
+        try:
+            if "ozon.ru" in item["url"]:
+                parsed = parse_ozon(item["url"])
+            elif "wildberries.ru" in item["url"]:
+                parsed = parse_wb(item["url"])
+            else:
+                return
+
+            new_price = parsed["price"]
+
+            if new_price != item["price"]:
+                await self.bot.send_message(
+                    self.chat_id,
+                    f"📉 Цена изменилась!\n\n"
+                    f"📦 {item['title']}\n"
+                    f"Было: {item['price']} ₽\n"
+                    f"Стало: {new_price} ₽"
+                )
+
+                update_price(item["id"], new_price)
+                item["price"] = new_price
+
+        except Exception as e:
+            print(f"[Scheduler error] {e}")
