@@ -1,4 +1,3 @@
 aiogram
 requests
-matplotlib
 apscheduler
