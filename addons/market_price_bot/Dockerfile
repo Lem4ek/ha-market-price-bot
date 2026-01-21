@@ -5,21 +5,19 @@ ENV LANG=C.UTF-8
 
 WORKDIR /app
 
-# 1️⃣ Устанавливаем Python и pip
+# Python + pip
 RUN apk add --no-cache \
     python3 \
     py3-pip \
     py3-setuptools
 
-# 2️⃣ Копируем зависимости
+# зависимости
 COPY requirements.txt /app/requirements.txt
-
-# 3️⃣ СТАВИМ pip-ПАКЕТЫ (ВАЖНО!)
 RUN pip3 install --no-cache-dir --break-system-packages -r /app/requirements.txt
 
-# 4️⃣ Копируем код
+# код
 COPY bot /app/bot
 COPY run.sh /app/run.sh
 
-# 5️⃣ Запуск
-CMD ["sh", "/app/run.sh"]
+# ПРАВИЛЬНЫЙ CMD
+CMD ["/app/run.sh"]
