@@ -1,0 +1,60 @@
+import asyncio
+import sqlite3
+import requests
+import re
+from aiogram import Bot
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from parsers.ozon import parse_ozon
+from parsers.wb import parse_wb
+
+DB_PATH = "/data/market.db"
+
+
+class PriceScheduler:
+    def __init__(self, bot: Bot, chat_id: int):
+        self.bot = bot
+        self.chat_id = chat_id
+        self.scheduler = AsyncIOScheduler()
+        self.db = sqlite3.connect(DB_PATH, check_same_thread=False)
+        self.db.row_factory = sqlite3.Row
+
+    def start(self):
+        self.scheduler.add_job(self.check_prices, "interval", minutes=5)
+        self.scheduler.start()
+
+    async def check_prices(self):
+        cur = self.db.cursor()
+        cur.execute("SELECT * FROM items")
+        items = cur.fetchall()
+
+        for item in items:
+            try:
+                url = item["url"]
+
+                if "ozon.ru" in url:
+                    new = parse_ozon(url)
+                elif "wildberries.ru" in url:
+                    new = parse_wb(url)
+                else:
+                    continue
+
+                new_price = new["price"]
+                old_price = item["price"]
+
+                if new_price != old_price:
+                    cur.execute(
+                        "UPDATE items SET price = ? WHERE id = ?",
+                        (new_price, item["id"])
+                    )
+                    self.db.commit()
+
+                    await self.bot.send_message(
+                        self.chat_id,
+                        f"📉 Цена изменилась!\n\n"
+                        f"📦 {item['title']}\n"
+                        f"Было: {old_price} ₽\n"
+                        f"Стало: {new_price} ₽"
+                    )
+
+            except Exception as e:
+                print("Scheduler error:", e)
