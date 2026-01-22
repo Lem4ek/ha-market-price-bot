@@ -1,2 +1,2 @@
-#!/usr/bin/with-contenv sh
+#!/bin/sh
 exec python /app/bot/main.py
