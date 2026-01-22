@@ -12,11 +12,16 @@ def set_scheduler(scheduler):
 
 def register_handlers(dp, chat_id):
 
-    @dp.message_handler(lambda m: "ozon.ru" in m.text or "wildberries.ru" in m.text)
+    @dp.message_handler(content_types=types.ContentType.TEXT)
     async def handle_link(message: types.Message):
-        url = message.text.strip()
+        text = message.text or ""
 
-        item = parse_ozon(url) if "ozon.ru" in url else parse_wb(url)
+        if "ozon.ru" not in text and "wildberries.ru" not in text:
+            return
+
+        await message.answer("🔍 Ссылку получил, обрабатываю…")
+
+        item = parse_ozon(text) if "ozon.ru" in text else parse_wb(text)
         add_pending(chat_id, item)
 
         await message.answer(

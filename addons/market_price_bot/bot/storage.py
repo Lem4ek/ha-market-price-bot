@@ -25,12 +25,10 @@ def add_pending(chat_id, item):
 def confirm_item(chat_id, interval):
     item = pending.pop(chat_id)
     cur.execute(
-        "INSERT INTO items (title, url, price, interval)
-         VALUES (?,?,?,?)",
+        "INSERT INTO items (title, url, price, interval) VALUES (?,?,?,?)",
         (item["title"], item["url"], item["price"], interval)
     )
     db.commit()
-
     cur.execute("SELECT * FROM items ORDER BY id DESC LIMIT 1")
     return cur.fetchone()
 
