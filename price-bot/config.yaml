@@ -1,28 +1,25 @@
-name: Price Tracker Bot
-version: "0.1.0"                  # меняй при каждом обновлении
-slug: price_bot
-description: "Telegram бот для отслеживания цен на Ozon и Wildberries"
-url: "https://github.com/твой-username/price-tracker-bot"
+name: Market Price Tracker Bot
+version: "0.1.0"  # обязательно в кавычках, semver формат!
+slug: market_price_bot  # lowercase, только буквы/цифры/_/-
+description: Telegram бот для отслеживания цен Ozon/Wildberries
+# url/arch опционально, но добавь
 arch:
-  - aarch64     # Raspberry Pi 4/5
+  - aarch64  # для твоей малинки
   - amd64
-  - armhf       # старые Raspberry
   - armv7
-  - i386
+  - armhf
 startup: application
 boot: auto
-host_network: true                # важно — чтобы видел localhost:8123 если нужно
+host_network: true
 map:
-  - config:rw                     # сохраняем базу данных в /config/price_bot
+  - config:rw
 options:
   TELEGRAM_TOKEN: ""
   PROXY_SERVER: ""
   PROXY_USERNAME: ""
   PROXY_PASSWORD: ""
 schema:
-  TELEGRAM_TOKEN: str(required)
+  TELEGRAM_TOKEN: str(required)  # required без значения!
   PROXY_SERVER: str?
   PROXY_USERNAME: str?
   PROXY_PASSWORD: str?
-image: "ghcr.io/твой-username/price-bot-{arch}"   # ← если будешь пушить в ghcr.io
-# или просто "твой-username/price-bot:{version}-{arch}" если используешь docker hub
