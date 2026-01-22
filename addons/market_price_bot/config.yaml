@@ -1,6 +1,6 @@
 name: Market Price Bot
 slug: market_price_bot
-version: "1.0.9"
+version: "1.0.10"
 description: Telegram bot for tracking Ozon & Wildberries prices
 startup: services
 boot: auto
