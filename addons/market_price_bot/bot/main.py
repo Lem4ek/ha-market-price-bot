@@ -3,8 +3,8 @@ from aiogram import Bot, Dispatcher, executor
 from handlers import register_handlers, set_scheduler
 from scheduler import PriceScheduler
 
+TOKEN = os.environ["TELEGRAM_TOKEN"]
 TOKEN = os.environ["telegram_token"]
-CHAT_ID = int(os.environ["chat_id"])
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
