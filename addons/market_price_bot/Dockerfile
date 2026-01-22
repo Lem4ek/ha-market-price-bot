@@ -17,4 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bot /app/bot
 COPY rootfs /
+RUN chmod +x /etc/services.d/bot/run
 
