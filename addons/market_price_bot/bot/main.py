@@ -1,64 +1,69 @@
-import json
 import logging
-
+import json
 from aiogram import Bot, Dispatcher, executor, types
 
-# ----------------------------
-# ЛОГИ
-# ----------------------------
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from parser_ozon import parse_ozon
+from parser_wb import parse_wb
+from ha_client import set_price_sensor
+from utils import make_entity_id
 
-# ----------------------------
-# ЧТЕНИЕ НАСТРОЕК HOME ASSISTANT
-# ----------------------------
+logging.basicConfig(level=logging.INFO)
+
 OPTIONS_PATH = "/data/options.json"
 
-try:
-    with open(OPTIONS_PATH, "r") as f:
-        options = json.load(f)
-except Exception as e:
-    raise RuntimeError(f"Cannot read {OPTIONS_PATH}: {e}")
+with open(OPTIONS_PATH, "r") as f:
+    options = json.load(f)
 
-TOKEN = options.get("telegram_token")
-CHAT_ID = options.get("chat_id")
+TOKEN = options["telegram_token"]
 
-if not TOKEN:
-    raise RuntimeError("telegram_token is not set in add-on configuration")
-
-# ----------------------------
-# TELEGRAM BOT
-# ----------------------------
 bot = Bot(token=TOKEN, parse_mode="HTML")
 dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands=["start"])
-async def start_handler(message: types.Message):
+async def start(message: types.Message):
     await message.answer(
-        "👋 Привет!\n\n"
-        "Отправь ссылку на товар с Ozon или Wildberries — "
-        "я её поймаю 😉"
+        "👋 Я отслеживаю цены товаров.\n\n"
+        "Пришли ссылку на товар из Ozon или Wildberries."
     )
 
 
-@dp.message_handler()
-async def any_message_handler(message: types.Message):
-    text = message.text.strip()
+@dp.message_handler(commands=["list"])
+async def list_cmd(message: types.Message):
+    await message.answer("📦 Список товаров пока пуст.")
 
-    logger.info(f"Received message: {text}")
 
-    # Пока просто отвечаем — это проверка, что бот живой
+@dp.message_handler(regexp=r"https?://")
+async def handle_link(message: types.Message):
+    url = message.text.strip()
+
+    if "ozon.ru" in url:
+        title, price = parse_ozon(url)
+        shop = "ozon"
+    elif "wildberries.ru" in url:
+        title, price = parse_wb(url)
+        shop = "wb"
+    else:
+        await message.answer("❌ Поддерживаются только Ozon и Wildberries")
+        return
+
+    entity_id = make_entity_id(title)
+
+    set_price_sensor(
+        entity_id=entity_id,
+        price=price,
+        title=title,
+        shop=shop,
+        url=url,
+    )
+
     await message.answer(
-        "🔗 Ссылку получил!\n\n"
-        f"<code>{text}</code>\n\n"
-        "Дальше подключим отслеживание цены 📈"
+        f"🛒 <b>{title}</b>\n\n"
+        f"💰 Цена сейчас: <b>{price} ₽</b>\n"
+        f"📡 Сенсор создан в Home Assistant"
     )
 
 
-# ----------------------------
-# START
-# ----------------------------
 if __name__ == "__main__":
-    logger.info("Market Price Bot started")
+    logging.info("Market Price Bot started")
     executor.start_polling(dp, skip_updates=True)

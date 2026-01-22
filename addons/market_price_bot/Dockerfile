@@ -1,22 +1,14 @@
-FROM python:3.11-alpine
-
-ENV PYTHONUNBUFFERED=1
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
 WORKDIR /app
 
-RUN apk add --no-cache \
-    gcc \
-    musl-dev \
-    linux-headers \
-    libffi-dev \
-    openssl-dev \
-    tzdata
+# Python уже есть в base-образе
+RUN apk add --no-cache python3 py3-pip
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bot /app/bot
-COPY run.sh /app/run.sh
-RUN chmod +x /app/run.sh
 
-CMD ["/app/run.sh"]
+CMD ["python3", "/app/bot/main.py"]
