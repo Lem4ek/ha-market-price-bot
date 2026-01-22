@@ -1,0 +1,8 @@
+aiogram==3.13.*
+aiosqlite==0.20.*
+playwright==1.49.*
+matplotlib==3.9.*
+numpy==2.0.*
+pillow==10.*
+apscheduler==3.10.*
+python-dotenv==1.0.*
